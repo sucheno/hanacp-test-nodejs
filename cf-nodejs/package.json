@@ -1,0 +1,13 @@
+{
+  "name": "cf-node",
+  "description": "Cloud Foundry NodeJS App",
+  "version": "0.0.1",
+  "dependencies": {
+    "express": "latest",
+    "cfenv": "latest",
+	"@sap/hdbext": "latest"
+  },
+  "engines": {
+    "node": "6.x.x"
+  }
+}

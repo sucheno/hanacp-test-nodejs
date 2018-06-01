@@ -1,0 +1,7 @@
+---
+applications:
+- name: cf-nodejs
+  host: cf-nodejs-X
+  memory: 128M
+  services:
+  - hana-schema
