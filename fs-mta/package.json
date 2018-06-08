@@ -1,0 +1,6 @@
+
+	"dependencies": {
+		"express": "latest",
+		"@sap/xsenv": "latest",
+		"@sap/hdbext": "latest"
+	},
