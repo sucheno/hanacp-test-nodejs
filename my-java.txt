@@ -11,7 +11,8 @@ web.xml:
 context.xml:
 
 <?xml version="1.0" encoding="UTF-8"?>
-<Context>  <Resource name="jdbc/DefaultDB"
+<Context>
+  <Resource name="jdbc/DefaultDB"
     auth="Container"
     type="javax.sql.DataSource"
     factory="com.sap.xs.jdbc.datasource.tomcat.TomcatDataSourceFactory"
@@ -53,8 +54,8 @@ import java.sql.*;​
           rs.close();    
           stmt.close();
           con.close();
-        }catch(NamingException e){
-               e.printStackTrace();
+        } catch(NamingException e){
+            e.printStackTrace();
         } catch (SQLException e) {
-               e.printStackTrace();
+            e.printStackTrace();
         }
