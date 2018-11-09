@@ -1,0 +1,60 @@
+web.xml:
+
+  <resource-ref>
+    <description>DB Connection</description>
+    <res-ref-name>jdbc/DefaultDB</res-ref-name>
+    <res-type>javax.sql.DataSource</res-type>
+    <res-auth>Container</res-auth>
+  </resource-ref>
+
+
+context.xml:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>  <Resource name="jdbc/DefaultDB"
+    auth="Container"
+    type="javax.sql.DataSource"
+    factory="com.sap.xs.jdbc.datasource.tomcat.TomcatDataSourceFactory"
+    service="hana-schema"/>
+</Context>
+
+
+MyJavaServlet:
+
+import java.io.PrintWriter;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+import java.sql.*;​
+
+        PrintWriter out = response.getWriter();
+        Context ctx = null;
+        Connection con = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+          ctx = new InitialContext();
+          DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/DefaultDB");
+          con = ds.getConnection();
+          stmt = con.createStatement();
+          rs = stmt.executeQuery("select SESSION_USER, CURRENT_SCHEMA from DUMMY");
+          rs.next();
+          out.println("SESSION_USER: " + rs.getString(1));
+          out.println("CURRENT_SCHEMA: " + rs.getString(2));
+          rs = stmt.executeQuery("select SYSTEM_ID, DATABASE_NAME, HOST, VERSION, USAGE from M_DATABASE");
+          rs.next();
+          rs.close();
+          out.println("SYSTEM_ID: " + rs.getString(1));
+          out.println("DATABASE_NAME: " + rs.getString(2));
+          out.println("HOST: " + rs.getString(3));
+          out.println("VERSION: " + rs.getString(4));
+          out.println("USAGE: " + rs.getString(5));
+          rs.close();    
+          stmt.close();
+          con.close();
+        }catch(NamingException e){
+               e.printStackTrace();
+        } catch (SQLException e) {
+               e.printStackTrace();
+        }
