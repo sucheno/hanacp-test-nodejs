@@ -42,9 +42,9 @@ import java.sql.*;​
           rs.next();
           out.println("SESSION_USER: " + rs.getString(1));
           out.println("CURRENT_SCHEMA: " + rs.getString(2));
+          rs.close();
           rs = stmt.executeQuery("select SYSTEM_ID, DATABASE_NAME, HOST, VERSION, USAGE from M_DATABASE");
           rs.next();
-          rs.close();
           out.println("SYSTEM_ID: " + rs.getString(1));
           out.println("DATABASE_NAME: " + rs.getString(2));
           out.println("HOST: " + rs.getString(3));
