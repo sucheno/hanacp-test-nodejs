@@ -1,0 +1,106 @@
+CREATE SCHEMA MYDATA;
+
+SET SCHEMA MYDATA;
+
+CREATE COLUMN TABLE SALES (
+    ID INTEGER NOT NULL,
+    REGION NVARCHAR(100),
+    COUNTRY NVARCHAR(100),
+    AMOUNT INTEGER,
+    PRIMARY KEY (ID)
+);
+
+INSERT INTO SALES VALUES (1, 'Europe', 'France', 123);
+INSERT INTO SALES VALUES (2, 'Europe', 'UK', 323);
+INSERT INTO SALES VALUES (3, 'Europe', 'Germany', 413);
+INSERT INTO SALES VALUES (4, 'Europe', 'Italy', 143);
+INSERT INTO SALES VALUES (5, 'Europe', 'Finland', 521);
+INSERT INTO SALES VALUES (6, 'Europe', 'Ireland', 253);
+INSERT INTO SALES VALUES (7, 'Europe', 'Spain', 273);
+INSERT INTO SALES VALUES (8, 'Europe', 'Portugal', 190);
+INSERT INTO SALES VALUES (9, 'North America', 'USA', 763);
+INSERT INTO SALES VALUES (10, 'North America', 'Mexico', 465);
+INSERT INTO SALES VALUES (11, 'North America', 'Canada', 349);
+INSERT INTO SALES VALUES (12, 'Asia', 'Japan', 732);
+INSERT INTO SALES VALUES (13, 'Asia', 'Malaysia', 233);
+INSERT INTO SALES VALUES (14, 'Asia', 'China', 821);
+INSERT INTO SALES VALUES (15, 'Asia', 'India', 692);
+
+SELECT * FROM SALES;
+
+---
+
+CREATE USER MYDATA_GRANTOR PASSWORD Password1 NO FORCE_FIRST_PASSWORD_CHANGE;
+
+CREATE ROLE "MYDATA::external_access_g";
+GRANT SELECT, SELECT METADATA ON SCHEMA MYDATA TO "MYDATA::external_access_g" WITH GRANT OPTION;
+
+CREATE ROLE "MYDATA::external_access";
+GRANT SELECT, SELECT METADATA ON SCHEMA MYDATA TO "MYDATA::external_access";
+
+GRANT "MYDATA::external_access_g", "MYDATA::external_access" TO MYDATA_GRANTOR WITH ADMIN OPTION;
+
+---
+
+{
+	"user": "MYDATA_GRANTOR",
+	"password": "Password1",
+	"schema": "MYDATA",
+	"tags": ["hana"]
+}
+
+cf cups mydata-schema -p "{\"user\":\"MYDATA_GRANTOR\", \"password\":\"Password1\", \"schema\":\"MYDATA\", \"tags\":[\"hana\"]}"
+
+---
+
+modules:
+ - name: mydb
+   type: hdb
+   path: mydb
+   requires:
+    - name: hdi_mydb
+      properties:
+        TARGET_CONTAINER: '~{hdi-container-name}'
+    - name: mydata-schema
+
+resources:
+ - name: hdi_mydb
+   properties:
+      hdi-container-name: ${service-name}
+   type: com.sap.xs.hdi-container
+ - name: mydata-schema
+   type: org.cloudfoundry.existing-service
+   parameters:
+     service-name: mydata-schema
+
+---
+
+src/mydata.hdbgrants:
+
+{
+	"mydata-schema": {
+		"object_owner": {
+			"roles": [
+				"MYDATA::external_access_g"
+			]
+		},
+		"application_user": {
+			"roles": [
+				"MYDATA::external_access"
+			]
+		}
+	}
+}
+
+---
+
+src/mydata.hdbsynonym
+
+{
+	"myapp.mydb::SALES": {
+		"target": {
+			"object": "SALES",
+			"schema": "MYDATA"
+		}
+	}
+}
